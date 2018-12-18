@@ -1,74 +1,78 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System;
 using UnityEngine;
 
 public class HumanScript : MonoBehaviour {
 
-    BallScript ball;
-    private float speed = 0.1f;
-    Vector3 ballPosition;
-    Vector3 humanPosition;
-    // Use this for initialization
+    #region Const
+    public static string ballObjectName = "ball";
+    public static float runSpeed = 0.13f;
+    public static float shotSpeed = 0.003f;
+    #endregion
+
+    #region Properties
+    private Rigidbody2D ballObject;
+    private Rigidbody2D humanObject;
+    #endregion
+
+    #region Methods
+
     void Start () {
 
     }
 	
-	// Update is called once per frame
 	void Update () {
         if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W))
         {
             Vector3 position = this.transform.position;
-            position.y+=speed;
+            position.y+= runSpeed;
             this.transform.position = position;
         }
         if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S))
         {
             Vector3 position = this.transform.position;
-            position.y-= speed;
+            position.y-= runSpeed;
             this.transform.position = position;
         }
         if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A))
         {
             Vector3 position = this.transform.position;
-            position.x-= speed;
+            position.x-= runSpeed;
             this.transform.position = position;
         }
         if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D))
         {
             Vector3 position = this.transform.position;
-            position.x+= speed;
+            position.x+= runSpeed;
             this.transform.position = position;
         }
 
         if(Input.GetKey(KeyCode.Space) && HumanVsBallPositionIsCorrect())
         {
-            Fire();
+            DoShot();
         }
 
     }
 
-    void Fire()
+    void DoShot()
     {
-        // Create the Bullet from the Bullet Prefab
-        var bullet = GameObject.Find("ball").GetComponent<Rigidbody2D>();
-        var currentHumanPosition = GetComponent<Rigidbody2D>().transform.position;
-        currentHumanPosition.x = currentHumanPosition.x;
-        currentHumanPosition.y = currentHumanPosition.y;
-        // Add velocity to the bullet
-        Vector3 shoot = ( bullet.transform.position + currentHumanPosition).normalized;
-        bullet.AddForce(shoot * 0.003f);
-
+        Vector3 shotVector = (ballObject.transform.position - humanObject.transform.position);
+        ballObject.AddForce(shotVector * shotSpeed);
     }
 
     public bool HumanVsBallPositionIsCorrect()
     {
-        ballPosition = GameObject.Find("ball").transform.position;
-        humanPosition = GetComponent<Rigidbody2D>().transform.position;
-        if (ballPosition.x - humanPosition.x < 1)
-            return true;
-        if (ballPosition.y - humanPosition.y < 1)
+        ballObject = GameObject.Find(ballObjectName).GetComponent<Rigidbody2D>();
+        humanObject = GetComponent<Rigidbody2D>();
+
+        //
+        // #TODO Wyliczenie możliwości strzału, teraz jest to spieprzone ;)
+        //
+        if ((Math.Abs(ballObject.transform.position.x) - Math.Abs(humanObject.transform.position.x) < 0.1) || 
+            (Math.Abs(ballObject.transform.position.y) - Math.Abs(humanObject.transform.position.y) < 0.1))
             return true;
         return false;
     }
+
+    #endregion
 
 }
